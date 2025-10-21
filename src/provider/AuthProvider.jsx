@@ -6,6 +6,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
+  updateProfile,
 } from "firebase/auth";
 
 export const AuthContext = createContext();
@@ -13,10 +14,10 @@ const auth = getAuth(app);
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  console.log(loading,user);
+  console.log(loading, user);
 
   const createUser = (email, password) => {
-    setLoading(true)
+    setLoading(true);
     return createUserWithEmailAndPassword(auth, email, password);
   };
 
@@ -25,22 +26,37 @@ const AuthProvider = ({ children }) => {
   };
 
   const userSignIn = (email, password) => {
-    setLoading(true)
-    return signInWithEmailAndPassword(auth, email, password)
+    setLoading(true);
+    return signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const updateUser = (updateData) => {
+    return updateProfile(auth.currentUser, updateData)
   }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setLoading(false)
+      setLoading(false);
     });
     return () => {
       unsubscribe();
     };
   }, []);
 
-  const authData = { user, setUser, createUser, userSignOut, userSignIn, loading, setLoading };
-  return <AuthContext value={authData}>{children}</AuthContext>;
+  const authData = {
+    user,
+    setUser,
+    createUser,
+    userSignOut,
+    userSignIn,
+    loading,
+    setLoading,
+    updateUser
+  };
+  return (
+    <AuthContext.Provider value={authData}>{children}</AuthContext.Provider>
+  );
 };
 
 export default AuthProvider;
